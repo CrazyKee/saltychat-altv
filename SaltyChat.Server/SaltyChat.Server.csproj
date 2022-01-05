@@ -9,6 +9,10 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>D:\PrimeV2Git\resources\SaltyClient\</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="AltV.Net" Version="6.0.2" />
     <PackageReference Include="AltV.Net.Async" Version="6.0.2" />
