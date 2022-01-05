@@ -50,7 +50,7 @@ namespace SaltyChat.Server
             Instance = this;
             Alt.OnPlayerDisconnect += OnServerPlayerDisconnect;
             Alt.OnServer<IPlayer, bool>("SaltyChat:SetPlayerAlive", OnServerSetPlayerAlive);
-            Alt.OnServer<IPlayer>("SaltyChat:EnablePlayer", OnServerEnablePlayer);
+            Alt.OnServer<IPlayer, int>("SaltyChat:EnablePlayer", OnServerEnablePlayer);
             Alt.OnServer<string>("SaltyChat:UpdateRadioTowers", OnServerUpdateRadioTowers);
             Alt.OnServer<IPlayer, string, bool>("SaltyChat:JoinRadioChannel", OnServerJoinRadioChannel);
             Alt.OnServer<IPlayer, string>("SaltyChat:LeaveRadioChannel", OnServerLeaveRadioChannel);
@@ -137,9 +137,9 @@ namespace SaltyChat.Server
             Alt.EmitAllClients("SaltyChat:UpdateClientAlive", voiceClient.Player, isAlive);
         }
 
-        private void OnServerEnablePlayer(IPlayer player)
+        private void OnServerEnablePlayer(IPlayer player, int charId)
         {
-            var voiceClient = new VoiceClient(player, GetTeamSpeakName(player), Configuration.VoiceRanges[1], player.Health > 100);
+            var voiceClient = new VoiceClient(player, GetTeamSpeakName(player, charId), Configuration.VoiceRanges[1], player.Health > 100);
             if (_voiceClients.ContainsKey(player)) _voiceClients[player] = voiceClient;
             else _voiceClients.TryAdd(player, voiceClient);
 
@@ -294,15 +294,19 @@ namespace SaltyChat.Server
 
         #region Methods: Misc
 
-        private string GetTeamSpeakName(IPlayer player)
+        private string GetTeamSpeakName(IPlayer player, int charId)
         {
-            var name = Configuration.NamePattern;
+            string name;
             do
             {
-                name = Regex.Replace(name, @"(\{guid\})", Guid.NewGuid().ToString().Replace("-", ""));
-                name = Regex.Replace(name, @"(\{serverid\})", player.Id.ToString());
-                if (name.Length > 30) name = name.Remove(29, name.Length - 30);
-            } while (_voiceClients.Values.Any(c => c.TeamSpeakName == name));
+                name = $"[{charId}] | PRIMERP";
+
+                if (name.Length > 30)
+                {
+                    name = name.Substring(0, 30);
+                }
+            }
+            while (this._voiceClients.Values.Any(c => c.TeamSpeakName == name));
 
             return name;
         }
